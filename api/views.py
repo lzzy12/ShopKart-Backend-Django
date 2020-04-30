@@ -8,9 +8,9 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Product
+from .models import Product, OrderProduct
 from .permissions import IsCreatorOrReadOnly, IsUnAuthenticated
-from .serializers import ProductsSerializer, UserSerializer
+from .serializers import ProductsSerializer, UserSerializer, OrderSerializer
 
 
 class ProductsListView(generics.ListCreateAPIView):
@@ -66,3 +66,10 @@ class SignUpView(APIView):
             return Response({'token': token.key, 'user': serialized.data})
         else:
             return Response({'error': serialized.errors}, status=status.HTTP_400_BAD_REQUEST)
+
+
+class OrderListView(generics.ListCreateAPIView):
+    def perform_create(self, serializer: OrderSerializer):
+        if serializer.is_valid():
+            order = serializer.save()
+            OrderProduct.objects.create(order=order, product=data)
